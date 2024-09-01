@@ -1,23 +1,28 @@
-import heapq
+import copy
+
 from src.Node import Node
 
+
 class SearchSolution:
-    def __init__(self, start, conRow, conColumn, conDiagonal, domains =None):
-        self.solution = None
-        if domains is None:
-            domains = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-        self.start = start
-        self.domains = domains
+    def __init__(self, startNode, conRow, conColumn, conDiagonal, domains =None):
+        self.start = startNode
         self.conRow = conRow
         self.conColumn = conColumn
         self.conDiagonal = conDiagonal
-        self.assigned = []
+        if domains is None:
+            domains = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        self.domains = domains
+        self.assignedIndex = []
         self.curr = []
+        self.isGoalReached = False
+        self.assigned = []
 
+    #Determines if there is a valid solution.
     def isValid(self, node):
-        #Evaluate if established values are able to reach each constraint.
+        # Evaluate if variables are larger than constriants.
         if node.sumMin() > self.conDiagonal[0] or node.sumMax() > self.conDiagonal[1]:
             return False
+        # Evaluate if variables with max values are able to reach constraints.
         if node.sumMin(True) < self.conDiagonal[0] or node.sumMax(True) < self.conDiagonal[1]:
             return False
         for i in range(len(node.value)):
@@ -27,57 +32,76 @@ class SearchSolution:
                 return False
         return True
 
-#Simple backtrace method.
+    # Unassigned Variables function
+    # Considers rows as variables with uninitialized values. Finds the most constrained variable
+    # returns the index of the list.
+    def getUnassignedVar(self, node):
+        unassigned = [i for i in (range(len(node.value))) if i not in self.assignedIndex]
+        #Call heuristic function
+        return min(unassigned, key = lambda i: node.totalVar(node.value[i]))
 
-#Unassigned Variables function
-#Considers rows as variables with unitialized values. Finds the most constrained variable and returns the list.
-    def getUnassginedVar(self, node):
-        unassigned = [var for var in node.value if var not in self.assigned]
-        return min(unassigned, key = lambda var: node.totalVar(var))
+    # Simple backtrace method.
+    def search(self):
+        if self.isValid(self.start):
+            solution = self.sortLists(self.backtrace(self.start))
+            self.isGoalReached = self.isGoalValue(solution)
+            return solution
 
-    def search(self, node):
-        self.solution = self. backtrace(node)
-        return self.solution
-    #Main backtrack algorithm as a helper.
+    # Backtrace function
+    # Helper to main search function
     def backtrace(self, node):
         #Base case
-        if len(self.assigned) == len(self.start.value):
+        if len(self.assignedIndex) == len(self.start.value):
             return self.curr
         #Recursive case
-        #May need to run smaller constraint problem for each list.
-        var = self.getUnassginedVar(node)
-        self.curr.append(self.setList(node, var))
-        self.assigned.append(var)
+        ivar = self.getUnassignedVar(node)
+        self.curr.append(self.setList(node, ivar))
+        self.assignedIndex.append(ivar)
         result = self.backtrace(node)
         if result is not None:
             return result
-        self.assigned.pop()
+        self.assignedIndex.pop()
         return None
 
-    def setList(self, node, var):
-        currlst = list(tuple(var))
+    #Sort the lists prior to returning the solution.
+    def sortLists(self, value):
+        return [x for _, x in sorted(zip(self.assignedIndex, value))]
+
+    def setList(self, node, ivar):
+        # Each list is a variable
+        # Each list is also treated as a CSP, and its elements as variables.
+        var = node.value[ivar]
         for i in range(len(var)):
-            for value in self.domains:
-                if currlst[i] == -1:
-                    if self.isConsistent(node, var, i, value):
+            if var[i] == -1:
+                #test each value in the domain set
+                for value in self.domains:
+                    newnode = copy.deepcopy(node)
+                    if self.isConsistent(newnode, ivar, i, value):
                         var[i] = value
+        return var
 
 
-        return currlst
-
-    #accept the state as a node, the row, and position being worked on, as well as the potential value.
+    #Assigns a value to an element of a list.
     #Check if consistency is broken after assignment.
-    def isConsistent(self, node, row, i, candidate):
+    def isConsistent(self, newnode, ivar, i, candidate):
+        #Add the candidate to the variable.
+        row = newnode.value[ivar]
         row[i] = candidate
-        if node.sumMin() > self.conDiagonal[0] or node.sumMax() > self.conDiagonal[1]:
+        # Run tests
+        return self.checkConsistency(newnode)
+
+    #Checks if a node is consistent.
+    def checkConsistency(self, newnode):
+        if newnode.sumMin() > self.conDiagonal[0] or newnode.sumMax() > self.conDiagonal[1]:
             return False
-        #This doesn't actually check if value is consistent.
-        for j in range(len(node.value)):
-            if node.sumRow(j) > self.conRow[j] or node.sumColumn(j) > self.conColumn[j]:
+        for j in range(len(newnode.value)):
+            if newnode.sumRow(j) > self.conRow[j] or newnode.sumColumn(j) > self.conColumn[j]:
                 return False
         return True
 
-    def isGoal(self, node):
+    #Checks if value is the goal value.
+    def isGoalValue(self, value):
+        node = Node(value)
         if node.sumMin() != self.conDiagonal[0] or node.sumMax() != self.conDiagonal[1]:
             return False
         for i in range(len(node.value)):

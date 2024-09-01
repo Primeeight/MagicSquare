@@ -1,12 +1,20 @@
+import sys
+from src.SearchSolution import SearchSolution as Search
 
 def main():
-    dimension, Square, sumRows, sumColumns, sumDiagonals = None, [], None, None, None
-    with open("sample1.txt", "r") as file:
+    fname = sys.argv[1]
+    dimension, square = None, []
+    with open(fname, "r") as file:
         dimension = int(file.readline())
         for i in range(dimension):
-            Square.append(list(map(int, file.readline().split())))
-        sumRows = list(map(int, file.readline().split()))
-        sumColumns = list(map(int, file.readline().split()))
-        sumDiagonals = tuple(map(int, file.readline().split()))
+            square.append(list(map(int, file.readline().split())))
+        conRows = list(map(int, file.readline().split()))
+        conColumns = list(map(int, file.readline().split()))
+        conDiagonals = tuple(map(int, file.readline().split()))
+        ss = Search(square, conRows, conColumns, conDiagonals)
+        result = ss.search()
+        for i in result:
+            print(i)
+
 if __name__ == '__main__':
     main()
