@@ -1,5 +1,4 @@
 import copy
-
 from src.Node import Node
 
 
@@ -13,13 +12,13 @@ class SearchSolution:
             domains = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
         self.domains = domains
         self.assignedIndex = []
-        self.curr = []
+        self.curr = self.start
         self.isGoalReached = False
-        self.assigned = []
+        self.varlist = self.getVarList(self.start)
 
     #Determines if there is a valid solution.
     def isValid(self, node):
-        # Evaluate if variables are larger than constriants.
+        # Evaluate if variables are larger than constraints.
         if node.sumMin() > self.conDiagonal[0] or node.sumMax() > self.conDiagonal[1]:
             return False
         # Evaluate if variables with max values are able to reach constraints.
@@ -35,60 +34,55 @@ class SearchSolution:
     # Unassigned Variables function
     # Considers rows as variables with uninitialized values. Finds the most constrained variable
     # returns the index of the list.
+
+    #Treat individual elements as variables, return a tuple as the index of the element.
     def getUnassignedVar(self, node):
-        unassigned = [i for i in (range(len(node.value))) if i not in self.assignedIndex]
+        unassigned = [[i, j]
+                      for i in (range(len(node.value)))
+                      for j in range(len(node.value))
+                      if [i, j] not in self.assignedIndex and [i, j] in self.varlist]
         #Call heuristic function
-        return min(unassigned, key = lambda i: node.totalVar(node.value[i]))
+        return min(unassigned, key = lambda index: node.totalVar(index[0], index[1]))
+
+    #Get the non-variables and add them to assigned.
+    def getVarList(self, node):
+        varlist = [[i, j]
+                    for i in (range(len(node.value)))
+                    for j in range(len(node.value))
+                    if node.value[i][j] == -1]
+        return varlist
 
     # Simple backtrace method.
     def search(self):
         if self.isValid(self.start):
-            solution = self.sortLists(self.backtrace(self.start))
-            self.isGoalReached = self.isGoalValue(solution)
+            solution = self.backtrace(self.start)
+            if solution is not None:
+                self.isGoalReached = True
             return solution
-
-    # Backtrace function
-    # Helper to main search function
+    #constantly retries values of 2,1 before erroring out, cannot find new value.
+    #Torwards the end, values in the last variable are left while the variable is not in assigned, causing consistency to be broken.
+    #If last variable does not retain value, able to find solution.
     def backtrace(self, node):
         #Base case
-        if len(self.assignedIndex) == len(self.start.value):
+        if len(self.assignedIndex) == len(self.varlist) and self.isGoalValue(node.value):
             return self.curr
         #Recursive case
-        ivar = self.getUnassignedVar(node)
-        self.curr.append(self.setList(node, ivar))
-        self.assignedIndex.append(ivar)
-        result = self.backtrace(node)
-        if result is not None:
-            return result
-        self.assignedIndex.pop()
-        return None
-
-    #Sort the lists prior to returning the solution.
-    def sortLists(self, value):
-        return [x for _, x in sorted(zip(self.assignedIndex, value))]
-
-    def setList(self, node, ivar):
-        # Each list is a variable
-        # Each list is also treated as a CSP, and its elements as variables.
-        var = node.value[ivar]
-        for i in range(len(var)):
-            if var[i] == -1:
-                #test each value in the domain set
-                for value in self.domains:
-                    newnode = copy.deepcopy(node)
-                    if self.isConsistent(newnode, ivar, i, value):
-                        var[i] = value
-        return var
+        if len(self.assignedIndex) != len(self.varlist):
+            ijvar = self.getUnassignedVar(node)
+            i, j = ijvar[0], ijvar[1]
+            newnode = copy.deepcopy(self.curr)
+            for value in self.domains:
+                newnode.value[i][j] = value
+                if self.checkConsistency(newnode):
+                    self.assignedIndex.append(ijvar)
+                    self.curr.value[i][j] = value
+                    result = self.backtrace(copy.deepcopy(self.curr))
+                    if result is not None:
+                        return result
+                    self.assignedIndex.pop()
+                    self.curr.value[i][j] = -1
 
 
-    #Assigns a value to an element of a list.
-    #Check if consistency is broken after assignment.
-    def isConsistent(self, newnode, ivar, i, candidate):
-        #Add the candidate to the variable.
-        row = newnode.value[ivar]
-        row[i] = candidate
-        # Run tests
-        return self.checkConsistency(newnode)
 
     #Checks if a node is consistent.
     def checkConsistency(self, newnode):
