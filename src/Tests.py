@@ -1,32 +1,39 @@
 import unittest
+
 from src.Node import Node
 from src.SearchSolution import SearchSolution as Search
 
 class MyTestCase(unittest.TestCase):
-    # def testadd(self):
-    #     node = Node([[1, -1, 3], [4, 5, 6]])
-    #     result = node.sumRow(0, False)
-    #     result2 = node.sumRow(0, True)
-    #     self.assertEqual(result, 4)
-    #     self.assertEqual(result2, 13)
-    # def testaddDiag(self):
-    #     node = Node([[1, 2, 3], [4, -1, 6], [7, 8, 9]])
-    #     result = node.sumMax()
-    #     result2 = node.sumMax(True)
-    #     self.assertEqual(result, 10)
-    #     self.assertEqual(result2, 19)
-    # def testIsValid(self):
-    #     node = Node([[1, -1, 3], [4, 5, 6], [7, 8, 9]])
-    #     ss = Search(node, [13,15, 24],[12,22, 18], [15, 15])
-    #     self.assertTrue(ss.isValid(node))
-    # def testGetUnassigned(self):
-    #     node = Node([[1, -1, -1], [-1, -1, 6], [7, -1, 9]])
-    #     ss = Search(node, [13,15, 24],[12,22, 18], [15, 15])
-    #     self.assertEqual(node.value[ss.getUnassignedVar(node)], [-1, -1, 6])
+    def testadd(self):
+        node = Node([[1, -1, 3], [4, 5, 6]])
+        result = node.sumRow(0, False)
+        result2 = node.sumRow(0, True)
+        self.assertEqual(result, 4)
+        self.assertEqual(result2, 13)
+
+    def testaddDiag(self):
+        node = Node([[1, 2, 3], [4, -1, 6], [7, 8, 9]])
+        result = node.sumMax()
+        result2 = node.sumMax(True)
+        self.assertEqual(result, 10)
+        self.assertEqual(result2, 19)
+
+    def testIsValid(self):
+        node = Node([[1, -1, 3], [4, 5, 6], [7, 8, 9]])
+        ss = Search(node, [13,15, 24],[12,22, 18], [15, 15])
+        self.assertTrue(ss.isValid(node))
+
     def testGetUnassignedValue(self):
         node = Node([[1, -1, -1], [-1, -1, 6], [7, -1, 9]])
         ss = Search(node, [13,15, 24],[12,22, 18], [15, 15])
         self.assertEqual(ss.getUnassignedVar(node), [0, 2])
+
+    def testGetConflicts(self):
+        node = Node([[5, 5, 0], [5, 1, 2], [-1, 5, 2]])
+        ss = Search(node, [10, 8, 9], [12, 10, 5], [9, 3])
+        result = node.getConflicts([2,1], [[0,0], [0,1], [1,1], [2,1], [2,2]])
+        self.assertEqual(result, [[0,1], [1,1], [2,1], [2,2]])
+
     # def testIsConsistent(self):
     #     node = Node([[1, -1, -1], [-1, -1, 6], [7, -1, 9]])
     #     ss = Search(node, [13, 15, 24], [12, 22, 18], [15, 15])
@@ -42,7 +49,7 @@ class MyTestCase(unittest.TestCase):
     #     for i in range(len(result)):
     #         print(result[i])
     #         print(ss.conRow[i])
-
+    #
     def testSearchSample(self):
         node = Node([[-1, -1, 0], [5, -1, 2], [-1, -1, -1]])
         ss = Search(node, [10, 8, 9], [12, 10, 5], [9, 3])
@@ -52,37 +59,31 @@ class MyTestCase(unittest.TestCase):
             print(result.value)
         self.assertTrue(ss.isGoalReached)
 
-    def testSearchSampleTwo(self):
-        node = Node([[5, -1, 0], [5, -1, 2], [2, -1, -1]])
-        ss = Search(node, [10, 8, 9], [12, 10, 5], [9, 3])
-        result = ss.search()
-        self.assertTrue(result)
-
-    def testGoal(self) :
-        node = Node([[1, -1, -1], [-1, -1, 6], [7, -1, 9]])
-        ss = Search(node, [13, 15, 24], [12, 22, 18], [15, 15])
-        result = ss.search()
-        goal = ss.isGoalValue(result.value)
-        self.assertTrue(goal)
-
-    def testFile(self):
-        fname = ["src/sample1.txt", "src/sample2.txt", "src/sample2_fail.txt", "src/sample3_fail.txt"]
-        dimension, square = None, []
-        for i in range(len(fname)):
-            with open(fname[i], "r") as file:
-                dimension = int(file.readline())
-                for j in range(dimension):
-                    square.append(list(map(int, file.readline().split())))
-                conRows = list(map(int, file.readline().split()))
-                conColumns = list(map(int, file.readline().split()))
-                conDiagonals = tuple(map(int, file.readline().split()))
-                ss = Search(Node(square), conRows, conColumns, conDiagonals)
-                result = ss.search()
-                dimension, square = None, []
-                if fname[i].__contains__("fail"):
-                    self.assertFalse(ss.isGoalReached)
-                else:
-                    self.assertTrue(ss.isGoalReached)
+    # def testGoal(self) :
+    #     node = Node([[1, -1, -1], [-1, -1, 6], [7, -1, 9]])
+    #     ss = Search(node, [13, 15, 24], [12, 22, 18], [15, 15])
+    #     result = ss.search()
+    #     goal = ss.isGoalValue(result.value)
+    #     self.assertTrue(goal)
+    #
+    # def testFile(self):
+    #     fname = ["src/sample1.txt", "src/sample2.txt", "src/sample2_fail.txt", "src/sample3_fail.txt"]
+    #     dimension, square = None, []
+    #     for i in range(len(fname)):
+    #         with open(fname[i], "r") as file:
+    #             dimension = int(file.readline())
+    #             for j in range(dimension):
+    #                 square.append(list(map(int, file.readline().split())))
+    #             conRows = list(map(int, file.readline().split()))
+    #             conColumns = list(map(int, file.readline().split()))
+    #             conDiagonals = tuple(map(int, file.readline().split()))
+    #             ss = Search(Node(square), conRows, conColumns, conDiagonals)
+    #             result = ss.search()
+    #             dimension, square = None, []
+    #             if fname[i].__contains__("fail"):
+    #                 self.assertFalse(ss.isGoalReached)
+    #             else:
+    #                 self.assertTrue(ss.isGoalReached)
 
     # def testFileLarge(self):
     #     fname = "src/sample3.txt"

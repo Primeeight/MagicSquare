@@ -49,5 +49,25 @@ class Node:
                     count += 1
             count -= 1
         return count
+    def getConflicts(self, value, assigned):
+        i, j, conflicts = value[0], value[1], []
+        #get major and minor axis
+        #get columns and rows
+        for k in range(len(self.value)):
+            if i == len(self.value) - j - 1 and [k, len(self.value) - k - 1] not in conflicts:
+                conflicts.append([k, len(self.value) - k - 1])
+            if i == j and [k, k] not in conflicts:
+                conflicts.append([k, k])
+            #check columns
+            if [k, j] not in conflicts:
+                conflicts.append([k, j])
+            #check rows
+            if [i, k] not in conflicts:
+                conflicts.append([i, k])
+        conflicts = [i for i in assigned if i in conflicts]
+        return conflicts
+
+
+
 
 

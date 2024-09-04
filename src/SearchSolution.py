@@ -15,6 +15,8 @@ class SearchSolution:
         self.curr = self.start
         self.isGoalReached = False
         self.varlist = self.getVarList(self.start)
+        self.currconf = []
+        self.conf = []
 
     #Determines if there is a valid solution.
     def isValid(self, node):
@@ -68,28 +70,42 @@ class SearchSolution:
             return self.curr
         #Recursive case
         if len(self.assignedIndex) != len(self.varlist):
+            # Will likely need to clear the conflict set after a variable is chosen.
             ijvar = self.getUnassignedVar(node)
             i, j = ijvar[0], ijvar[1]
             newnode = copy.deepcopy(self.curr)
             for value in self.domains:
                 newnode.value[i][j] = value
-                if self.checkConsistency(newnode):
+                if self.checkConsistency(newnode, [i, j]):
                     self.assignedIndex.append(ijvar)
                     self.curr.value[i][j] = value
                     result = self.backtrace(copy.deepcopy(self.curr))
                     if result is not None:
                         return result
+                    #does absorbing the conflict list happen here?
+                    #Try absorbing the conflict list here.
                     self.assignedIndex.pop()
                     self.curr.value[i][j] = -1
+        if self.currconf:
+            self.conf = self.conf + [value for value in self.currconf if value not in self.conf]
+            var = self.conf.pop()
+            self.assignedIndex.remove(var)
+            self.curr.value[var[0]][var[1]] = -1
+
+
+
 
 
 
     #Checks if a node is consistent.
-    def checkConsistency(self, newnode):
+    def checkConsistency(self, newnode, value):
         if newnode.sumMin() > self.conDiagonal[0] or newnode.sumMax() > self.conDiagonal[1]:
+            self.currconf = newnode.getConflicts(value, self.assignedIndex)
             return False
         for j in range(len(newnode.value)):
             if newnode.sumRow(j) > self.conRow[j] or newnode.sumColumn(j) > self.conColumn[j]:
+                #Assigned set != Conflict set at this time, Conflict set will be a subset.
+                self.currconf = newnode.getConflicts(value, self.assignedIndex)
                 return False
         return True
 
