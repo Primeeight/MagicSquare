@@ -84,13 +84,15 @@ class SearchSolution:
                         return result
                     #does absorbing the conflict list happen here?
                     #Try absorbing the conflict list here.
+                    #Dobule deletion here.
                     self.assignedIndex.pop()
                     self.curr.value[i][j] = -1
-        if self.currconf:
-            self.conf = self.conf + [value for value in self.currconf if value not in self.conf]
-            var = self.conf.pop()
-            self.assignedIndex.remove(var)
-            self.curr.value[var[0]][var[1]] = -1
+            if self.currconf:
+                self.conf = self.conf + [value for value in self.currconf if value not in self.conf]
+                var = self.conf.pop()
+                if var in self.assignedIndex:
+                self.assignedIndex.remove(var)
+                self.curr.value[var[0]][var[1]] = -1
 
 
 
