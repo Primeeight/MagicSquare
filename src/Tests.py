@@ -1,7 +1,7 @@
 import unittest
 
-from src.Node import Node
-from src.SearchSolution import SearchSolution as Search
+from Node import Node
+from SearchSolution import SearchSolution as Search
 
 class MyTestCase(unittest.TestCase):
     def testadd(self):
@@ -38,6 +38,7 @@ class MyTestCase(unittest.TestCase):
     #     node = Node([[1, -1, -1], [-1, -1, 6], [7, -1, 9]])
     #     ss = Search(node, [13, 15, 24], [12, 22, 18], [15, 15])
     #     self.assertTrue(ss.isConsistent(node, 0, 2, 1))
+
     # def testBacktrace(self):
     #     node = Node([[1, -1, -1], [-1, -1, 6], [7, -1, 9]])
     #     ss = Search(node, [13, 15, 24], [12, 22, 18], [15, 15])
@@ -50,12 +51,20 @@ class MyTestCase(unittest.TestCase):
     #         print(result[i])
     #         print(ss.conRow[i])
     #
-    def testSearchSample(self):
+    # def testSearchSampleNative(self):
+    #     node = Node([[-1, -1, 0], [5, -1, 2], [-1, -1, -1]])
+    #     ss = Search(node, [10, 8, 9], [12, 10, 5], [9, 3])
+    #     result = ss.backtrace(node)
+    #     if result:
+    #         print("testing sample with native backtrace")
+    #         print(result.value)
+    #
+    def testSearchSampleBackjump(self):
         node = Node([[-1, -1, 0], [5, -1, 2], [-1, -1, -1]])
         ss = Search(node, [10, 8, 9], [12, 10, 5], [9, 3])
         result = ss.search()
         if result:
-            print("testing sample")
+            print("testing sample with back jumping")
             print(result.value)
         self.assertTrue(ss.isGoalReached)
 

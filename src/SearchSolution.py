@@ -1,5 +1,5 @@
 import copy
-from src.Node import Node
+from Node import Node
 
 
 class SearchSolution:
@@ -54,17 +54,16 @@ class SearchSolution:
                     if node.value[i][j] == -1]
         return varlist
 
-    # Simple backtrace method.
     def search(self):
         if self.isValid(self.start):
-            solution = self.backtrace(self.start)
+            solution = self.cdBackjump(self.start)
             if solution is not None:
                 self.isGoalReached = True
             return solution
     #constantly retries values of 2,1 before erroring out, cannot find new value.
     #Torwards the end, values in the last variable are left while the variable is not in assigned, causing consistency to be broken.
     #If last variable does not retain value, able to find solution.
-    def backtrace(self, node):
+    def cdBackjump(self, node):
         #Base case
         if len(self.assignedIndex) == len(self.varlist) and self.isGoalValue(node.value):
             return self.curr
@@ -79,22 +78,96 @@ class SearchSolution:
                 if self.checkConsistency(newnode, [i, j]):
                     self.assignedIndex.append(ijvar)
                     self.curr.value[i][j] = value
-                    result = self.backtrace(copy.deepcopy(self.curr))
+                    result = self.cdBackjump(copy.deepcopy(self.curr))
                     if result is not None:
                         return result
+                    self.currconf = newnode.getConflicts([i, j], self.assignedIndex)
                     #does absorbing the conflict list happen here?
                     #Try absorbing the conflict list here.
                     #Dobule deletion here.
+                    #Curr element is deleted before appending to prior conflict set.
+                    if ijvar in self.assignedIndex:
+                        self.assignedIndex.pop()
+                        self.curr.value[i][j] = -1
+                        #Backjumping code causing issues with chronological version.
+            if self.currconf:
+                #Does not give proper conflict set for non-leaf nodes.
+                #Goes into a leaf node before back jumping.
+                self.conf = self.conf + [value for value in self.currconf if value not in self.conf]
+                var = self.conf.pop()
+                if var in self.assignedIndex:
+                    self.assignedIndex.remove(var)
+                    self.curr.value[var[0]][var[1]] = -1
+                self.currconf.clear()
+
+
+    def cdBackjumpBackup(self, node):
+        #Base case
+        if len(self.assignedIndex) == len(self.varlist) and self.isGoalValue(node.value):
+            return self.curr
+        #Recursive case
+        if len(self.assignedIndex) != len(self.varlist):
+            # Will likely need to clear the conflict set after a variable is chosen.
+            ijvar = self.getUnassignedVar(node)
+            i, j = ijvar[0], ijvar[1]
+            newnode = copy.deepcopy(self.curr)
+            for value in self.domains:
+                newnode.value[i][j] = value
+                if self.checkConsistency(newnode, [i, j]):
+                    self.assignedIndex.append(ijvar)
+                    self.curr.value[i][j] = value
+                    result = self.cdBackjump(copy.deepcopy(self.curr))
+                    if result is not None:
+                        return result
+                    self.currconf = newnode.getConflicts([i, j], self.assignedIndex)
+                    #does absorbing the conflict list happen here?
+                    #Try absorbing the conflict list here.
+                    #Dobule deletion here.
+                    #Curr element is deleted before appending to prior conflict set.
+                    if ijvar in self.assignedIndex:
+                        self.assignedIndex.pop()
+                        self.curr.value[i][j] = -1
+                        #Backjumping code causing issues with chronological version.
+            if self.currconf:
+                #Does not give proper conflict set for non-leaf nodes.
+                #Goes into a leaf node before back jumping.
+                self.conf = self.conf + [value for value in self.currconf if value not in self.conf]
+                var = self.conf.pop()
+                if var in self.assignedIndex:
+                    self.assignedIndex.remove(var)
+                    self.curr.value[var[0]][var[1]] = -1
+                self.currconf.clear()
+
+    # Simple backtrace method.
+    def backtrace(self, node):
+        # Base case
+        if len(self.assignedIndex) == len(self.varlist) and self.isGoalValue(node.value):
+            return self.curr
+        # Recursive case
+        if len(self.assignedIndex) != len(self.varlist):
+            # Will likely need to clear the conflict set after a variable is chosen.
+            ijvar = self.getUnassignedVar(node)
+            i, j = ijvar[0], ijvar[1]
+            newnode = copy.deepcopy(self.curr)
+            for value in self.domains:
+                newnode.value[i][j] = value
+                if self.checkConsistency(newnode, [i, j]):
+                    self.assignedIndex.append(ijvar)
+                    self.curr.value[i][j] = value
+                    result = self.backtrace(copy.deepcopy(self.curr))
+                    if result is not None:
+                        return result
+                    # does absorbing the conflict list happen here?
+                    # Try absorbing the conflict list here.
+                    # Dobule deletion here.
                     self.assignedIndex.pop()
                     self.curr.value[i][j] = -1
             if self.currconf:
                 self.conf = self.conf + [value for value in self.currconf if value not in self.conf]
                 var = self.conf.pop()
                 if var in self.assignedIndex:
-                self.assignedIndex.remove(var)
+                    self.assignedIndex.remove(var)
                 self.curr.value[var[0]][var[1]] = -1
-
-
 
 
 
@@ -102,12 +175,10 @@ class SearchSolution:
     #Checks if a node is consistent.
     def checkConsistency(self, newnode, value):
         if newnode.sumMin() > self.conDiagonal[0] or newnode.sumMax() > self.conDiagonal[1]:
-            self.currconf = newnode.getConflicts(value, self.assignedIndex)
             return False
         for j in range(len(newnode.value)):
             if newnode.sumRow(j) > self.conRow[j] or newnode.sumColumn(j) > self.conColumn[j]:
                 #Assigned set != Conflict set at this time, Conflict set will be a subset.
-                self.currconf = newnode.getConflicts(value, self.assignedIndex)
                 return False
         return True
 

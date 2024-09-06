@@ -1,5 +1,6 @@
 import sys
-from src.SearchSolution import SearchSolution as Search
+from Node import Node
+from SearchSolution import SearchSolution as Search
 
 def main():
     fname = sys.argv[1]
@@ -11,10 +12,14 @@ def main():
         conRows = list(map(int, file.readline().split()))
         conColumns = list(map(int, file.readline().split()))
         conDiagonals = tuple(map(int, file.readline().split()))
-        ss = Search(square, conRows, conColumns, conDiagonals)
+        ss = Search(Node(square), conRows, conColumns, conDiagonals)
         result = ss.search()
-        for i in result:
-            print(i)
+        if result:
+            print("True")
+            for i in result.value:
+                print(i)
+        else:
+            print("False")
 
 if __name__ == '__main__':
     main()
