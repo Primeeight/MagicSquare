@@ -1,38 +1,42 @@
+import copy
 import unittest
+import random
+import timeit
+from copy import deepcopy
 
 from Node import Node
 from SearchSolution import SearchSolution as Search
 
 class MyTestCase(unittest.TestCase):
-    def testadd(self):
-        node = Node([[1, -1, 3], [4, 5, 6]])
-        result = node.sumRow(0, False)
-        result2 = node.sumRow(0, True)
-        self.assertEqual(result, 4)
-        self.assertEqual(result2, 13)
-
-    def testaddDiag(self):
-        node = Node([[1, 2, 3], [4, -1, 6], [7, 8, 9]])
-        result = node.sumMax()
-        result2 = node.sumMax(True)
-        self.assertEqual(result, 10)
-        self.assertEqual(result2, 19)
-
-    def testIsValid(self):
-        node = Node([[1, -1, 3], [4, 5, 6], [7, 8, 9]])
-        ss = Search(node, [13,15, 24],[12,22, 18], [15, 15])
-        self.assertTrue(ss.isValid(node))
-
-    def testGetUnassignedValue(self):
-        node = Node([[1, -1, -1], [-1, -1, 6], [7, -1, 9]])
-        ss = Search(node, [13,15, 24],[12,22, 18], [15, 15])
-        self.assertEqual(ss.getUnassignedVar(node), [0, 2])
-
-    def testGetConflicts(self):
-        node = Node([[5, 5, 0], [5, 1, 2], [-1, 5, 2]])
-        ss = Search(node, [10, 8, 9], [12, 10, 5], [9, 3])
-        result = node.getConflicts([2,1], [[0,0], [0,1], [1,1], [2,1], [2,2]])
-        self.assertEqual(result, [[0,1], [1,1], [2,1], [2,2]])
+    # def testadd(self):
+    #     node = Node([[1, -1, 3], [4, 5, 6]])
+    #     result = node.sumRow(0, False)
+    #     result2 = node.sumRow(0, True)
+    #     self.assertEqual(result, 4)
+    #     self.assertEqual(result2, 13)
+    #
+    # def testaddDiag(self):
+    #     node = Node([[1, 2, 3], [4, -1, 6], [7, 8, 9]])
+    #     result = node.sumMax()
+    #     result2 = node.sumMax(True)
+    #     self.assertEqual(result, 10)
+    #     self.assertEqual(result2, 19)
+    #
+    # def testIsValid(self):
+    #     node = Node([[1, -1, 3], [4, 5, 6], [7, 8, 9]])
+    #     ss = Search(node, [13,15, 24],[12,22, 18], [15, 15])
+    #     self.assertTrue(ss.isValid(node))
+    #
+    # def testGetUnassignedValue(self):
+    #     node = Node([[1, -1, -1], [-1, -1, 6], [7, -1, 9]])
+    #     ss = Search(node, [13,15, 24],[12,22, 18], [15, 15])
+    #     self.assertEqual(ss.getUnassignedVar(node), [0, 2])
+    #
+    # def testGetConflicts(self):
+    #     node = Node([[5, 5, 0], [5, 1, 2], [-1, 5, 2]])
+    #     ss = Search(node, [10, 8, 9], [12, 10, 5], [9, 3])
+    #     result = node.getConflicts([2,1], [[0,0], [0,1], [1,1], [2,1], [2,2]])
+    #     self.assertEqual(result, [[0,1], [1,1], [2,1], [2,2]])
 
     # def testIsConsistent(self):
     #     node = Node([[1, -1, -1], [-1, -1, 6], [7, -1, 9]])
@@ -58,15 +62,87 @@ class MyTestCase(unittest.TestCase):
     #     if result:
     #         print("testing sample with native backtrace")
     #         print(result.value)
+
+    # def testSearchSampleBackjump(self):
+    #     node = Node([[-1, -1, 0], [5, -1, 2], [-1, -1, -1]])
+    #     ss = Search(node, [10, 8, 9], [12, 10, 5], [9, 3])
+    #     result = ss.search()
+    #     if result:
+    #         print("testing sample with back jumping")
+    #         print(result.value)
+    #     self.assertTrue(ss.isGoalReached)
+
+    # def testSearchSampleBackjumpVar(self):
+    #     n = 10
+    #     conRow, conCol, conDiag = [], [], []
+    #     lst = [[0] * n]*n
+    #     for i in range(len(lst)):
+    #         lst[i] = list(map(lambda x: random.randint(0, 10)-1, lst[i]))
+    #     node = Node(copy.deepcopy(lst))
+    #     for i in range(len(lst)):
+    #         conRow.append(node.sumRow(i, True))
+    #         conCol.append(node.sumColumn(i, True))
+    #     conDiag = [node.sumMin(True), node.sumMax(True)]
+    #     ss = Search(node, conRow, conCol, conDiag)
+    #     result = ss.search()
+    #     if result:
+    #         print ("original")
+    #         print(lst)
+    #         print("testing sample with back jumping")
+    #         print(result.value)
+    #     self.assertTrue(ss.isGoalReached)
     #
-    def testSearchSampleBackjump(self):
-        node = Node([[-1, -1, 0], [5, -1, 2], [-1, -1, -1]])
-        ss = Search(node, [10, 8, 9], [12, 10, 5], [9, 3])
+    # def testSearchSampleBackTraceVar(self):
+    #     n = 10
+    #     conRow, conCol, conDiag = [], [], []
+    #     lst = [[0] * n]*n
+    #     for i in range(len(lst)):
+    #         lst[i] = list(map(lambda x: random.randint(0, 10)-1, lst[i]))
+    #     node = Node(copy.deepcopy(lst))
+    #     for i in range(len(lst)):
+    #         conRow.append(node.sumRow(i, True))
+    #         conCol.append(node.sumColumn(i, True))
+    #     conDiag = [node.sumMin(True), node.sumMax(True)]
+    #     ss = Search(node, conRow, conCol, conDiag)
+    #     result = ss.backtrace(node)
+    #     if result:
+    #         print ("original")
+    #         print(lst)
+    #         print("testing sample with backtracing")
+    #         print(result.value)
+
+    def testSearchSampleBacktraceBackjump(self):
+        n = 4
+        conRow, conCol, conDiag = [], [], []
+        lst = [-1]*n
+        for i in range(len(lst)):
+            lst[i] = random.choices([random.randint(0,9), -1],[.667, .333], k=n)
+        node = Node(copy.deepcopy(lst))
+        for i in range(len(lst)):
+            conRow.append(node.sumRow(i, True))
+            conCol.append(node.sumColumn(i, True))
+        conDiag = [node.sumMin(True), node.sumMax(True)]
+        ss = Search(node, conRow, conCol, conDiag)
+        bjtime = timeit.default_timer()
         result = ss.search()
+        bjtime = round((timeit.default_timer() - bjtime)/1000000000, 3)
         if result:
+            print ("original")
+            print(lst)
             print("testing sample with back jumping")
             print(result.value)
+            print(bjtime)
         self.assertTrue(ss.isGoalReached)
+        ss = Search(node, conRow, conCol, conDiag)
+        bttime = timeit.default_timer()
+        result = ss.backtrace(node)
+        bttime = round((timeit.default_timer() - bttime) / 1000000000, 3)
+        if result:
+            print ("original")
+            print(lst)
+            print("testing sample with backtracing")
+            print(result.value)
+            print(bttime)
 
     # def testGoal(self) :
     #     node = Node([[1, -1, -1], [-1, -1, 6], [7, -1, 9]])

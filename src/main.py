@@ -6,6 +6,7 @@ def main():
     fname = sys.argv[1]
     dimension, square = None, []
     with open(fname, "r") as file:
+        #Accept the parameters line by line.
         dimension = int(file.readline())
         for i in range(dimension):
             square.append(list(map(int, file.readline().split())))
@@ -14,6 +15,7 @@ def main():
         conDiagonals = tuple(map(int, file.readline().split()))
         ss = Search(Node(square), conRows, conColumns, conDiagonals)
         result = ss.search()
+        #If a valid result was returned, print the result.
         if result:
             print("True")
             for i in result.value:

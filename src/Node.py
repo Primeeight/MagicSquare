@@ -1,7 +1,7 @@
 class Node:
     def __init__(self, value = None):
         self.value = value
-    #May define function to find sum rows, columns, diagonals.
+    #Adds all the elements of a list together, can treat variables as max value for determining a solution.
     def sumList(self, row, countVar):
         if countVar:
             row = list (map(lambda x: x + 10 if(x == -1) else x, row))
