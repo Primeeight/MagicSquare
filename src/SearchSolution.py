@@ -17,6 +17,8 @@ class SearchSolution:
         self.varlist = self.getVarList(self.start)
         self.currconf = []
         self.conf = []
+        self.confSets = {}
+
 
     #Determines if there is a valid solution.
     def isValid(self, node):
