@@ -30,25 +30,51 @@ class Node:
     def sumRow(self, i, countVar = False):
         row = list(tuple(self.value[i]))
         return self.sumList(row, countVar)
-    #Most constrained value heuristic.
-    #Gives the total number of variables in a list, prioritizes variables in the max diagonal, as well as the min diagonal.
 
+    # Degree heuristic.
+    # Gives the total number of variables in a list, prioritizes variables in the max diagonal,
+    # as well as the min diagonal.
+    # Assumes given value is a variable.
     def totalVar(self, i, j):
-        count, value = 1, self.value[i][j]
-        if value == -1:
-            if j == i:
-                count -= 1
-            if j == len(self.value) - i - 1:
-                count -= 1
-            for k in range (len(self.value[i])):
-                if k == -1:
-                    count += 1
+        count= 0
+        if i == j:
             count -= 1
-            for k in range(len(self.value)):
-                if self.value[k][j] == -1:
-                    count += 1
+        if i == len(self.value) - j -1:
             count -= 1
+        count -= 2
+        for k in range(len(self.value)):
+            if i == j and self.value[k][k] == -1:
+                count += 1
+            if i == len(self.value) - j - 1 and self.value[k][len(self.value) - k - 1] == -1:
+                count += 1
+            if self.value[i][k] == -1:
+                count += 1
+            if self.value[k][j] == -1:
+                count += 1
         return count
+
+    # Min remaining values heuristic.
+    # Gives the remaining values a variable can have.
+    # Assumes given value is a variable.
+    def minRemaining(self, i, j, conDiag, conRow, conCol):
+        lst = [10]*4
+        if j == i:
+            value = conDiag[0] - self.sumMax()
+            if value < 10:
+                lst[0] = value
+        if j == len(self.value) - i - 1:
+            value = conDiag[1] - self.sumMin()
+            if value < 10:
+                lst[1] = value
+        value = conRow[i] - self.sumRow(i)
+        if value < 10:
+            lst[2] = value
+        value = conCol[j] - self.sumColumn(j)
+        if value < 10:
+            lst[3] = value
+        result = min(lst)
+        return result
+
     def getConflicts(self, value, assigned):
         i, j, conflicts = value[0], value[1], []
         #get major and minor axis
