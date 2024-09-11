@@ -33,10 +33,7 @@ class SearchSolution:
                 return False
         return True
 
-    # Unassigned Variables function
-    # Considers rows as variables with uninitialized values. Finds the most constrained variable
-    # returns the index of the list.
-
+    #Unassigned Variables function
     #Treat individual elements as variables, return a tuple as the index of the element.
     def getUnassignedVar(self, node):
         unassigned = [[i, j]
@@ -84,17 +81,11 @@ class SearchSolution:
                     if result is not None:
                         return result
                     self.currconf = newnode.getConflicts([i, j], self.assignedIndex)
-                    # does absorbing the conflict list happen here?
-                    # Try absorbing the conflict list here.
-                    # Dobule deletion here.
-                    # Curr element is deleted before appending to prior conflict set.
                     if ijvar in self.assignedIndex:
                         self.assignedIndex.pop()
                         self.curr.value[i][j] = -1
-                        # Backjumping code causing issues with chronological version.
+                        # Back jumping code here causes issues with the chronological version.
             if self.currconf:
-                # Does not give proper conflict set for non-leaf nodes.
-                # Goes into a leaf node before back jumping.
                 self.conf = self.conf + [value for value in self.currconf if value not in self.conf]
                 var = self.conf.pop()
                 if var in self.assignedIndex:
