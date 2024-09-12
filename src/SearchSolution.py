@@ -17,7 +17,7 @@ class SearchSolution:
         self.varlist = self.getVarList(self.start)
         self.currconf = []
         self.conf = []
-        self.confSets = {}
+        self.confSets = self.initDict(self.varlist)
 
 
     #Determines if there is a valid solution.
@@ -35,6 +35,11 @@ class SearchSolution:
                 return False
         return True
 
+    def initDict(self, varlist):
+        dict = {}
+        for var in varlist:
+            dict[tuple(var)] = []
+        return dict
     #Unassigned Variables function
     #Treat individual elements as variables, return a tuple as the index of the element.
     def getUnassignedVar(self, node):
@@ -82,18 +87,20 @@ class SearchSolution:
                     result = self.cdBackjump(copy.deepcopy(self.curr))
                     if result is not None:
                         return result
-                    self.currconf = newnode.getConflicts([i, j], self.assignedIndex)
+                    self.confSets[(i, j)] = newnode.getConflicts([i, j], self.assignedIndex)
                     if ijvar in self.assignedIndex:
                         self.assignedIndex.pop()
                         self.curr.value[i][j] = -1
                         # Back jumping code here causes issues with the chronological version.
-            if self.currconf:
-                self.conf = self.conf + [value for value in self.currconf if value not in self.conf]
-                var = self.conf.pop()
+            if self.confSets.get((i, j)):
+                current = self.confSets.get((i, j))
+                var = current.pop(len(current)-1)
+                parent = self.confSets[tuple(var)]
+                #join operation
+                parent = parent + [value for value in current if value not in parent]
                 if var in self.assignedIndex:
                     self.assignedIndex.remove(var)
                     self.curr.value[var[0]][var[1]] = -1
-                self.currconf.clear()
 
     # Native backtrace method.
     def backtrace(self, node):
