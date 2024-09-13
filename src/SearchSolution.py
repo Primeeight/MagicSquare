@@ -15,8 +15,6 @@ class SearchSolution:
         self.curr = self.start
         self.isGoalReached = False
         self.varlist = self.getVarList(self.start)
-        self.currconf = []
-        self.conf = []
         self.confSets = self.initDict(self.varlist)
 
 
@@ -84,10 +82,12 @@ class SearchSolution:
                 if self.checkConsistency(newnode):
                     self.assignedIndex.append(ijvar)
                     self.curr.value[i][j] = value
+                    self.confSets[(i, j)] = \
+                        (self.confSets[(i, j)] +[value for value in newnode.getConflicts([i, j], self.assignedIndex)
+                            if value not in self.confSets[(i, j)]])
                     result = self.cdBackjump(copy.deepcopy(self.curr))
                     if result is not None:
                         return result
-                    self.confSets[(i, j)] = newnode.getConflicts([i, j], self.assignedIndex)
                     if ijvar in self.assignedIndex:
                         self.assignedIndex.pop()
                         self.curr.value[i][j] = -1
@@ -97,7 +97,7 @@ class SearchSolution:
                 var = current.pop(len(current)-1)
                 parent = self.confSets[tuple(var)]
                 #join operation
-                parent = parent + [value for value in current if value not in parent]
+                self.confSets[tuple(var)] = parent + [value for value in current if value not in parent]
                 if var in self.assignedIndex:
                     self.assignedIndex.remove(var)
                     self.curr.value[var[0]][var[1]] = -1
