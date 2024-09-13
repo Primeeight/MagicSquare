@@ -98,36 +98,16 @@ class MyTestCase(unittest.TestCase):
             print(result.values())
         self.assertFalse(result[list(result.keys())[0]])
 
-    def testSearchSampleBackJump(self):
-        node = Node([[-1, -1, 0], [5, -1, 2], [-1, -1, -1]])
-        ss = Search(node, [10, 8, 9], [12, 10, 5], [9, 3])
-        result = ss.search()
-        if result:
-            print("testing sample with back jumping")
-            print(result.value)
-        self.assertTrue(ss.isGoalReached)
-
-    # def testSearchSampleBackjumpVar(self):
-    #     n = 3
-    #     conRow, conCol, conDiag = [], [], []
-    #     lst = [-1] * n
-    #     for i in range(len(lst)):
-    #         lst[i] = random.choices([random.randint(0, 9), -1], [.667, .333], k=n)
-    #     node = Node(copy.deepcopy(lst))
-    #     for i in range(len(lst)):
-    #         conRow.append(node.sumRow(i, True))
-    #         conCol.append(node.sumColumn(i, True))
-    #     conDiag = [node.sumMin(True), node.sumMax(True)]
-    #     ss = Search(node, conRow, conCol, conDiag)
+    # def testSearchSampleBackJump(self):
+    #     node = Node([[-1, -1, 0], [5, -1, 2], [-1, -1, -1]])
+    #     ss = Search(node, [10, 8, 9], [12, 10, 5], [9, 3])
     #     result = ss.search()
     #     if result:
-    #         print ("original")
-    #         print(lst)
     #         print("testing sample with back jumping")
     #         print(result.value)
     #     self.assertTrue(ss.isGoalReached)
 
-    def testSearchSampleBackTraceVar(self):
+    def testSearchSampleBackjumpVar(self):
         n = 3
         conRow, conCol, conDiag = [], [], []
         lst = [-1] * n
@@ -139,12 +119,32 @@ class MyTestCase(unittest.TestCase):
             conCol.append(node.sumColumn(i, True))
         conDiag = [node.sumMin(True), node.sumMax(True)]
         ss = Search(node, conRow, conCol, conDiag)
-        result = ss.backtrace(node)
+        result = ss.search()
         if result:
             print ("original")
             print(lst)
-            print("testing sample with backtracing")
+            print("testing sample with back jumping")
             print(result.value)
+        self.assertTrue(ss.isGoalReached)
+
+    # def testSearchSampleBackTraceVar(self):
+    #     n = 3
+    #     conRow, conCol, conDiag = [], [], []
+    #     lst = [-1] * n
+    #     for i in range(len(lst)):
+    #         lst[i] = random.choices([random.randint(0, 9), -1], [.667, .333], k=n)
+    #     node = Node(copy.deepcopy(lst))
+    #     for i in range(len(lst)):
+    #         conRow.append(node.sumRow(i, True))
+    #         conCol.append(node.sumColumn(i, True))
+    #     conDiag = [node.sumMin(True), node.sumMax(True)]
+    #     ss = Search(node, conRow, conCol, conDiag)
+    #     result = ss.backtrace(node)
+    #     if result:
+    #         print ("original")
+    #         print(lst)
+    #         print("testing sample with backtracing")
+    #         print(result.value)
 
     # def testBacktraceAndBackJump(self):
     #     n = 3

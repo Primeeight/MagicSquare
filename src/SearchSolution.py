@@ -73,7 +73,6 @@ class SearchSolution:
             return self.curr
             # Recursive case
         if len(self.assignedIndex) != len(self.varlist):
-            # Will likely need to clear the conflict set after a variable is chosen.
             ijvar = self.getUnassignedVar(node)
             i, j = ijvar[0], ijvar[1]
             newnode = copy.deepcopy(self.curr)
@@ -82,9 +81,10 @@ class SearchSolution:
                 if self.checkConsistency(newnode):
                     self.assignedIndex.append(ijvar)
                     self.curr.value[i][j] = value
-                    self.confSets[(i, j)] = \
-                        (self.confSets[(i, j)] +[value for value in newnode.getConflicts([i, j], self.assignedIndex)
-                            if value not in self.confSets[(i, j)]])
+                    self.confSets[(i, j)] = newnode.getConflicts([i,j], self.assignedIndex)
+                    # \
+                    #     (self.confSets[(i, j)] +[value for value in newnode.getConflicts([i, j], self.assignedIndex)
+                    #         if value not in self.confSets[(i, j)]])
                     result = self.cdBackjump(copy.deepcopy(self.curr))
                     if result is not None:
                         return result
@@ -92,6 +92,8 @@ class SearchSolution:
                         self.assignedIndex.pop()
                         self.curr.value[i][j] = -1
                         # Back jumping code here causes issues with the chronological version.
+                else:
+                    break
             if self.confSets.get((i, j)):
                 current = self.confSets.get((i, j))
                 var = current.pop(len(current)-1)
