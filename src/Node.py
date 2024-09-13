@@ -76,7 +76,7 @@ class Node:
         return result
 
     def getConflicts(self, value, assigned):
-        i, j, conflicts = value[0], value[1], []
+        i, j, conflicts = value[0], value[1], [value]
         #get major and minor axis
         #get columns and rows
         for k in range(len(self.value)):
@@ -90,6 +90,7 @@ class Node:
             #check rows
             if [i, k] not in conflicts:
                 conflicts.append([i, k])
+        conflicts.remove(value)
         conflicts = [i for i in assigned if i in conflicts]
         return conflicts
 
