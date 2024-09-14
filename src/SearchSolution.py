@@ -45,8 +45,10 @@ class SearchSolution:
                       for i in (range(len(node.value)))
                       for j in range(len(node.value))
                       if [i, j] not in self.assignedIndex and [i, j] in self.varlist]
+        unassigned = [x for x in self.varlist if x in unassigned]
         #Call heuristic function
-        return min(unassigned, key= lambda index: self.heuristic(index, node))
+        x = min(unassigned, key= lambda index: self.heuristic(index, self.start))
+        return x
 
     def heuristic(self, index, node):
         result =(node.minRemaining(index[0], index[1],self.conDiagonal,self.conRow,self.conColumn),
@@ -58,6 +60,7 @@ class SearchSolution:
                     for i in (range(len(node.value)))
                     for j in range(len(node.value))
                     if node.value[i][j] == -1]
+        varlist.sort(key = lambda index: self.heuristic(index, node))
         return varlist
 
     def search(self):
@@ -81,10 +84,8 @@ class SearchSolution:
                 if self.checkConsistency(newnode):
                     self.assignedIndex.append(ijvar)
                     self.curr.value[i][j] = value
-                    self.confSets[(i, j)] = newnode.getConflicts([i,j], self.assignedIndex)
-                    # \
-                    #     (self.confSets[(i, j)] +[value for value in newnode.getConflicts([i, j], self.assignedIndex)
-                    #         if value not in self.confSets[(i, j)]])
+                    #get conflicts method may be incorrect.
+                    self.confSets[(i, j)] = (self.confSets[(i, j)] +[value for value in newnode.getConflicts([i, j], self.assignedIndex)if value not in self.confSets[(i, j)]])
                     result = self.cdBackjump(copy.deepcopy(self.curr))
                     if result is not None:
                         return result
@@ -100,6 +101,9 @@ class SearchSolution:
                 parent = self.confSets[tuple(var)]
                 #join operation
                 self.confSets[tuple(var)] = parent + [value for value in current if value not in parent]
+                #clear operation
+                self.confSets[(i,j)].clear()
+                #Does double deletion as last part.
                 if var in self.assignedIndex:
                     self.assignedIndex.remove(var)
                     self.curr.value[var[0]][var[1]] = -1
