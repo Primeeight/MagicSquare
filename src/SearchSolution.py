@@ -76,6 +76,7 @@ class SearchSolution:
             return self.curr
             # Recursive case
         if len(self.assignedIndex) != len(self.varlist):
+            #Heuristic may switch order of parents/children
             ijvar = self.getUnassignedVar(node)
             i, j = ijvar[0], ijvar[1]
             newnode = copy.deepcopy(self.curr)
