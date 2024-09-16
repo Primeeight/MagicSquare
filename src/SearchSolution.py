@@ -4,17 +4,22 @@ from Node import Node
 
 class SearchSolution:
     def __init__(self, startNode, conRow, conColumn, conDiagonal, domains =None):
+        #Initial node provided
         self.start = startNode
+        #Constraints
         self.conRow = conRow
         self.conColumn = conColumn
         self.conDiagonal = conDiagonal
         if domains is None:
             domains = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
         self.domains = domains
+        #Assigned values
         self.assignedIndex = []
         self.curr = self.start
         self.isGoalReached = False
+        #The variables to be assigned
         self.varlist = self.getVarList(self.start)
+        #The dictionary of conflict sets.
         self.confSets = self.initDict(self.varlist)
 
 
@@ -33,6 +38,7 @@ class SearchSolution:
                 return False
         return True
 
+    #Create an empty dictionary with an entry for all variables.
     def initDict(self, varlist):
         dict = {}
         for var in varlist:
@@ -41,28 +47,24 @@ class SearchSolution:
     #Unassigned Variables function
     #Treat individual elements as variables, return a tuple as the index of the element.
     def getUnassignedVar(self, node):
-        # unassigned = [[i, j]
-        #               for i in (range(len(node.value)))
-        #               for j in range(len(node.value))
-        #               if [i, j] not in self.assignedIndex and [i, j] in self.varlist]
+        #Order is assigned using heuristics at the beginning of program.
         unassigned = [x for x in self.varlist if x not in self.assignedIndex]
-        #Call heuristic function
-        # x = min(unassigned, key= lambda index: self.heuristic(index, self.start))
         return unassigned[0]
-
+    #Heuristic function, returns a pair of min value, negative degree value
     def heuristic(self, index, node):
         result =(node.minRemaining(index[0], index[1],self.conDiagonal,self.conRow,self.conColumn),
                   -node.totalVar(index[0], index[1]))
         return result
-    #Get the non-variables and add them to assigned.
     def getVarList(self, node):
         varlist = [[i, j]
                     for i in (range(len(node.value)))
                     for j in range(len(node.value))
                     if node.value[i][j] == -1]
+        #Sort the list of variables by the heuristic.
         varlist.sort(key = lambda index: self.heuristic(index, node))
         return varlist
 
+    #Main search function
     def search(self):
         if self.isValid(self.start):
             solution = self.cdBackjump(self.start)
@@ -70,6 +72,7 @@ class SearchSolution:
                 self.isGoalReached = True
             return solution
 
+    #Conflict Directed Back jumping
     def cdBackjump(self, node):
         #Base case
         if len(self.assignedIndex) == len(self.varlist) and self.isGoalValue(node.value):
@@ -95,16 +98,18 @@ class SearchSolution:
                         self.curr.value[i][j] = -1
                         # Back jumping code here causes issues with the chronological version.
                 else:
+                    #Stop checking this variable if consistency is broken.
                     break
+            #Conflict directed jump
             if self.confSets.get((i, j)):
                 current = self.confSets.get((i, j))
+                #Get the most recent variable
                 var = current.pop(len(current)-1)
                 parent = self.confSets[tuple(var)]
                 #join operation
                 self.confSets[tuple(var)] = parent + [value for value in current if value not in parent]
                 #clear operation
                 self.confSets[(i,j)].clear()
-                #Does double deletion as last part.
                 if var in self.assignedIndex:
                     self.assignedIndex.remove(var)
                     self.curr.value[var[0]][var[1]] = -1
