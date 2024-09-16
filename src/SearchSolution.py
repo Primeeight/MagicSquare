@@ -41,14 +41,14 @@ class SearchSolution:
     #Unassigned Variables function
     #Treat individual elements as variables, return a tuple as the index of the element.
     def getUnassignedVar(self, node):
-        unassigned = [[i, j]
-                      for i in (range(len(node.value)))
-                      for j in range(len(node.value))
-                      if [i, j] not in self.assignedIndex and [i, j] in self.varlist]
-        unassigned = [x for x in self.varlist if x in unassigned]
+        # unassigned = [[i, j]
+        #               for i in (range(len(node.value)))
+        #               for j in range(len(node.value))
+        #               if [i, j] not in self.assignedIndex and [i, j] in self.varlist]
+        unassigned = [x for x in self.varlist if x not in self.assignedIndex]
         #Call heuristic function
-        x = min(unassigned, key= lambda index: self.heuristic(index, self.start))
-        return x
+        # x = min(unassigned, key= lambda index: self.heuristic(index, self.start))
+        return unassigned[0]
 
     def heuristic(self, index, node):
         result =(node.minRemaining(index[0], index[1],self.conDiagonal,self.conRow,self.conColumn),
