@@ -88,8 +88,7 @@ class SearchSolution:
                 if self.checkConsistency(newnode):
                     self.assignedIndex.append(ijvar)
                     self.curr.value[i][j] = value
-                    #get conflicts method may be incorrect.
-                    self.confSets[(i, j)] = (self.confSets[(i, j)] +[value for value in newnode.getConflicts([i, j], self.assignedIndex)if value not in self.confSets[(i, j)]])
+                    self.confSets[(i, j)] = (self.confSets[(i, j)] + [value for value in newnode.getConflicts([i, j], self.assignedIndex)if value not in self.confSets[(i, j)]])
                     result = self.cdBackjump(copy.deepcopy(self.curr))
                     if result is not None:
                         return result
@@ -105,9 +104,15 @@ class SearchSolution:
                 current = self.confSets.get((i, j))
                 #Get the most recent variable
                 var = current.pop(len(current)-1)
+                # mr = []
+                # if current:
+                #     mr = current[len(current)-1]
                 parent = self.confSets[tuple(var)]
                 #join operation
-                self.confSets[tuple(var)] = parent + [value for value in current if value not in parent]
+                self.confSets[tuple(var)] = [value for value in current if value not in parent] + parent
+                # if mr:
+                #     self.confSets[tuple(var)].remove(mr)
+                #     self.confSets[tuple(var)].append(mr)
                 #clear operation
                 self.confSets[(i,j)].clear()
                 if var in self.assignedIndex:
