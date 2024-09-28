@@ -81,15 +81,15 @@ class Node:
         #get columns and rows
         for k in range(len(self.value)):
             if i == len(self.value) - j - 1 and [k, len(self.value) - k - 1] not in conflicts:
-                conflicts.append([k, len(self.value) - k - 1])
+                conflicts.append((k, len(self.value) - k - 1))
             if i == j and [k, k] not in conflicts:
-                conflicts.append([k, k])
+                conflicts.append((k, k))
             #check columns
             if [k, j] not in conflicts:
-                conflicts.append([k, j])
+                conflicts.append((k, j))
             #check rows
             if [i, k] not in conflicts:
-                conflicts.append([i, k])
+                conflicts.append((i, k))
         conflicts.remove(value)
         conflicts = [i for i in assigned if i in conflicts]
         return conflicts

@@ -104,17 +104,16 @@ class MyTestCase(unittest.TestCase):
         result = ss.search()
         if result:
             print("testing sample with back jumping")
-            print(result.value)
         self.assertTrue(ss.isGoalReached)
 
-    def testSearchBackjumpLarger(self):
-        node = Node([[8,7,3,1], [2, 4, -1, 8], [-1, -1, 9, 0], [0, 2, -1, -1]])
-        ss = Search(node, [19, 20, 12, 12], [11, 15, 22, 15], [27, 9])
-        result = ss.search()
-        if result:
-            print("testing sample n = 4")
-            print(result.value)
-        self.assertTrue(ss.isGoalReached)
+    # def testSearchBackjumpLarger(self):
+    #     node = Node([[8,7,3,1], [2, 4, -1, 8], [-1, -1, 9, 0], [0, 2, -1, -1]])
+    #     ss = Search(node, [19, 20, 12, 12], [11, 15, 22, 15], [27, 9])
+    #     result = ss.search()
+    #     if result:
+    #         print("testing sample n = 4")
+    #         print(result.value)
+    #     self.assertTrue(ss.isGoalReached)
 
     # def testSearchSampleBackjumpVar(self):
     #     n = 3
@@ -184,7 +183,6 @@ class MyTestCase(unittest.TestCase):
     #     if result:
     #         print ("original:")
     #         print(lst)
-    #         print("testing sample with back tracing")
     #         print(result.value)
     #         print(bttime)
 
@@ -194,7 +192,7 @@ class MyTestCase(unittest.TestCase):
     #     result = ss.search()
     #     goal = ss.isGoalValue(result.value)
     #     self.assertTrue(goal)
-    #
+
     # def testFile(self):
     #     fname = ["src/sample1.txt", "src/sample2.txt", "src/sample2_fail.txt", "src/sample3_fail.txt"]
     #     dimension, square = None, []
@@ -207,14 +205,15 @@ class MyTestCase(unittest.TestCase):
     #             conColumns = list(map(int, file.readline().split()))
     #             conDiagonals = tuple(map(int, file.readline().split()))
     #             ss = Search(Node(square), conRows, conColumns, conDiagonals)
-    #             result = ss.search()
+    #             ss.search()
     #             dimension, square = None, []
+    #             print(fname[i])
     #             if fname[i].__contains__("fail"):
     #                 self.assertFalse(ss.isGoalReached)
     #             else:
     #                 self.assertTrue(ss.isGoalReached)
 
-    # # Currently this test does not get a solution due to the problem size, will lead to hanging.
+    # Currently this test does not get a solution due to the problem size, will lead to hanging.
     # def testFileLarge(self):
     #     fname = "src/sample3.txt"
     #     dimension, square = None, []

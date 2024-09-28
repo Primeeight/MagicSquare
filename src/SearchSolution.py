@@ -14,12 +14,13 @@ class SearchSolution:
             domains = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
         self.domains = domains
         #Assigned values
-        self.assignedIndex = []
+        self.assigned = {}
         self.curr = self.start
         self.isGoalReached = False
         #The variables to be assigned
         self.varlist = self.getVarList(self.start)
         #The dictionary of conflict sets.
+        #Revise to have empty dictionary.
         self.confSets = self.initDict(self.varlist)
 
 
@@ -48,7 +49,7 @@ class SearchSolution:
     #Treat individual elements as variables, return a tuple as the index of the element.
     def getUnassignedVar(self, node):
         #Order is assigned using heuristics at the beginning of program.
-        unassigned = [x for x in self.varlist if x not in self.assignedIndex]
+        unassigned = [x for x in self.varlist if x not in list(self.assigned.keys())]
         return unassigned[0]
     #Heuristic function, returns a pair of min value, negative degree value
     def heuristic(self, index, node):
@@ -56,7 +57,7 @@ class SearchSolution:
                   -node.totalVar(index[0], index[1]))
         return result
     def getVarList(self, node):
-        varlist = [[i, j]
+        varlist = [(i, j)
                     for i in (range(len(node.value)))
                     for j in range(len(node.value))
                     if node.value[i][j] == -1]
@@ -68,76 +69,71 @@ class SearchSolution:
     def search(self):
         if self.isValid(self.start):
             solution = self.cdBackjump(self.start)
-            if solution is not None:
-                self.isGoalReached = True
             return solution
 
     #Conflict Directed Back jumping
     def cdBackjump(self, node):
         #Base case
-        if len(self.assignedIndex) == len(self.varlist) and self.isGoalValue(node.value):
+        if len(self.assigned) == len(self.varlist) and self.isGoalValue(node.value):
+            self.isGoalReached = True
             return self.curr
             # Recursive case
-        if len(self.assignedIndex) != len(self.varlist):
-            #Heuristic may switch order of parents/children
+        if len(self.assigned) != len(self.varlist):
             ijvar = self.getUnassignedVar(node)
             i, j = ijvar[0], ijvar[1]
             newnode = copy.deepcopy(self.curr)
+            if (i,j) in self.confSets:
+                self.confSets[(i, j)] = (self.confSets[(i, j)] + [value for value in newnode.getConflicts([i, j], list(self.assigned.keys())) if
+                                                 value not in self.confSets[(i, j)]])
+            else:
+                self.confSets[(i, j)] = newnode.getConflicts([i, j], list(self.assigned.keys()))
             for value in self.domains:
                 newnode.value[i][j] = value
                 if self.checkConsistency(newnode):
-                    self.assignedIndex.append(ijvar)
+                    self.assigned[tuple(ijvar)] = value
                     self.curr.value[i][j] = value
-                    self.confSets[(i, j)] = (self.confSets[(i, j)] + [value for value in newnode.getConflicts([i, j], self.assignedIndex)if value not in self.confSets[(i, j)]])
                     result = self.cdBackjump(copy.deepcopy(self.curr))
                     if result is not None:
-                        return result
-                    if ijvar in self.assignedIndex:
-                        self.assignedIndex.pop()
-                        self.curr.value[i][j] = -1
-                        # Back jumping code here causes issues with the chronological version.
-                else:
-                    #Stop checking this variable if consistency is broken.
-                    break
-            #Conflict directed jump
-            if self.confSets.get((i, j)):
-                current = self.confSets.get((i, j))
-                #Get the most recent variable
-                var = current.pop(len(current)-1)
-                # mr = []
-                # if current:
-                #     mr = current[len(current)-1]
-                parent = self.confSets[tuple(var)]
-                #join operation
-                self.confSets[tuple(var)] = [value for value in current if value not in parent] + parent
-                # if mr:
-                #     self.confSets[tuple(var)].remove(mr)
-                #     self.confSets[tuple(var)].append(mr)
-                #clear operation
-                self.confSets[(i,j)].clear()
-                if var in self.assignedIndex:
-                    self.assignedIndex.remove(var)
-                    self.curr.value[var[0]][var[1]] = -1
+                        if self.isGoalReached:
+                            return result
+                        if result is not ijvar:
+                            self.assigned.pop(ijvar)
+                            self.curr.value[i][j] = -1
+                            return result
+
+                # conflict set generation
+            current = self.confSets.get((i, j))
+            #Get the most recent variable
+            parentvar = current.pop()
+            parent = self.confSets[tuple(parentvar)]
+            #join operation
+            # self.confSets[tuple(parentvar)] =  [value for value in current if value not in parent] + parent
+            self.confSets[tuple(parentvar)] = list(set.union(set(parent), set(current)))
+            self.confSets.pop(tuple(ijvar))
+            if ijvar in self.assigned:
+                self.assigned.pop(tuple(ijvar))
+                self.curr.value[ijvar[0]][ijvar[1]] = -1
+            return parentvar
 
     # Native backtrace method.
     def backtrace(self, node):
         # Base case
-        if len(self.assignedIndex) == len(self.varlist) and self.isGoalValue(node.value):
+        if len(self.assigned) == len(self.varlist) and self.isGoalValue(node.value):
             return self.curr
         # Recursive case
-        if len(self.assignedIndex) != len(self.varlist):
+        if len(self.assigned) != len(self.varlist):
             ijvar = self.getUnassignedVar(node)
             i, j = ijvar[0], ijvar[1]
             newnode = copy.deepcopy(self.curr)
             for value in self.domains:
                 newnode.value[i][j] = value
                 if self.checkConsistency(newnode):
-                    self.assignedIndex.append(ijvar)
+                    self.assigned.append(ijvar)
                     self.curr.value[i][j] = value
                     result = self.backtrace(copy.deepcopy(self.curr))
                     if result is not None:
                         return result
-                    self.assignedIndex.pop()
+                    self.assigned.pop()
                     self.curr.value[i][j] = -1
 
     #Checks if a node is consistent.
