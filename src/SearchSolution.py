@@ -63,10 +63,14 @@ class SearchSolution:
                     if node.value[i][j] == -1]
         #Sort the list of variables by the heuristic.
         varlist.sort(key = lambda index: self.heuristic(index, node))
+        print("Var list is:")
+        for i in varlist:
+            print(i)
         return varlist
 
     #Main search function
     def search(self):
+        print("checking variables:")
         if self.isValid(self.start):
             solution = self.cdBackjump(self.start)
             return solution
@@ -90,6 +94,7 @@ class SearchSolution:
             for value in self.domains:
                 newnode.value[i][j] = value
                 if self.checkConsistency(newnode):
+                    print(tuple(ijvar))
                     self.assigned[tuple(ijvar)] = value
                     self.curr.value[i][j] = value
                     result = self.cdBackjump(copy.deepcopy(self.curr))
@@ -103,12 +108,14 @@ class SearchSolution:
 
                 # conflict set generation
             current = self.confSets.get((i, j))
+            current = [i for i in self.assigned if i in current]
             #Get the most recent variable
             parentvar = current.pop()
             parent = self.confSets[tuple(parentvar)]
             #join operation
             # self.confSets[tuple(parentvar)] =  [value for value in current if value not in parent] + parent
-            self.confSets[tuple(parentvar)] = list(set.union(set(parent), set(current)))
+            newcurrent = list(set.union(set(parent), set(current)))
+            self.confSets[tuple(parentvar)] = newcurrent
             self.confSets.pop(tuple(ijvar))
             if ijvar in self.assigned:
                 self.assigned.pop(tuple(ijvar))
