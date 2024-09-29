@@ -115,7 +115,7 @@ class MyTestCase(unittest.TestCase):
     #     self.assertTrue(ss.isGoalReached)
 
     # def testSearchBackjumpLarger(self):
-    #     node = Node([[8,7,3,1], [2, 4, -1, 8], [-1, 2, -1, 0], [0, 2, -1, -1]])
+    #     node = Node([[8,7,3,1], [2, 4, -1, 8], [-1, -1, 9, 0], [0, 2, -1, -1]])
     #     ss = Search(node, [19, 20, 12, 12], [11, 15, 22, 15], [27, 9])
     #     result = ss.search()
     #     if result:
@@ -233,10 +233,15 @@ class MyTestCase(unittest.TestCase):
             conColumns = list(map(int, file.readline().split()))
             conDiagonals = tuple(map(int, file.readline().split()))
             ss = Search(Node(square), conRows, conColumns, conDiagonals)
+            # mapping = ss.mapConnections(square)
+            # for i in mapping:
+            #     print(i)
             result = ss.search()
             for i in result:
                 print (i)
             self.assertTrue(ss.isGoalReached)
+
+
 
 if __name__ == '__main__':
     unittest.main()
