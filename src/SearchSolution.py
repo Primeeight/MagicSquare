@@ -162,4 +162,8 @@ class SearchSolution:
                 return False
         return True
 
-
+    def mapConnections(self, table):
+        for i in range(len(table)):
+            newlst = list(map(lambda x: 0 if x!= -1 else x ,table[i]))
+            table[i] = newlst
+        return table
