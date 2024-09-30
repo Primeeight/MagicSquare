@@ -21,7 +21,9 @@ class SearchSolution:
         self.varlist = self.getVarList(self.start)
         #The dictionary of conflict sets.
         #Revise to have empty dictionary.
-        self.confSets = self.initDict(self.varlist)
+        self.confSets = {}
+        # self.confSets = self.initDict(self.varlist)
+        self.visited = []
 
 
     #Determines if there is a valid solution.
@@ -40,11 +42,11 @@ class SearchSolution:
         return True
 
     #Create an empty dictionary with an entry for all variables.
-    def initDict(self, varlist):
-        dict = {}
-        for var in varlist:
-            dict[tuple(var)] = []
-        return dict
+    # def initDict(self, varlist):
+    #     dict = {}
+    #     for var in varlist:
+    #         dict[tuple(var)] = []
+    #     return dict
     #Unassigned Variables function
     #Treat individual elements as variables, return a tuple as the index of the element.
     def getUnassignedVar(self, node):
@@ -89,12 +91,14 @@ class SearchSolution:
             if (i,j) in self.confSets:
                 self.confSets[(i, j)] = (self.confSets[(i, j)] + [value for value in newnode.getConflicts([i, j], list(self.assigned.keys())) if
                                                  value not in self.confSets[(i, j)]])
+                self.confSets[(i, j)] = [k for k in self.assigned if k in self.confSets.get((i, j))]
             else:
                 self.confSets[(i, j)] = newnode.getConflicts([i, j], list(self.assigned.keys()))
+
             for value in self.domains:
                 newnode.value[i][j] = value
                 if self.checkConsistency(newnode):
-                    print(tuple(ijvar))
+                    # print(tuple(ijvar))
                     self.assigned[tuple(ijvar)] = value
                     self.curr.value[i][j] = value
                     result = self.cdBackjump(copy.deepcopy(self.curr))
@@ -120,6 +124,8 @@ class SearchSolution:
             if ijvar in self.assigned:
                 self.assigned.pop(tuple(ijvar))
                 self.curr.value[ijvar[0]][ijvar[1]] = -1
+            print (parentvar) if parentvar not in self.visited else ""
+            self.visited.append(parentvar) if parentvar not in self.visited else ""
             return parentvar
 
     # Native backtrace method.

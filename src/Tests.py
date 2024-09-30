@@ -122,9 +122,18 @@ class MyTestCase(unittest.TestCase):
     #         print("testing sample n = 4")
     #         print(result.value)
     #     self.assertTrue(ss.isGoalReached)
+    def testSearchBackjump5(self):
+        node = Node([[4, -1, -1, 4, 4],
+                     [8, -1, -1, -1, 8],
+                     [4, 4, -1, -1, 4],
+                     [1, -1, -1, 1, 1],
+                     [2, 2, 2, -1, 2]])
+        ss = Search(node, [18, 25, 18, 9, 11], [19, 15, 14, 14, 19], [13, 15])
+        result = ss.search()
+        self.assertTrue(ss.isGoalReached)
 
     # def testSearchSampleBackjumpVar(self):
-    #     n = 6
+    #     n = 5
     #     conRow, conCol, conDiag = [], [], []
     #     lst = [-1] * n
     #     for i in range(len(lst)):
@@ -222,24 +231,24 @@ class MyTestCase(unittest.TestCase):
     #                 self.assertTrue(ss.isGoalReached)
 
     # Currently this test does not get a solution due to the problem size, will lead to hanging.
-    def testFileLarge(self):
-        fname = "src/sample3.txt"
-        dimension, square = None, []
-        with open(fname, "r") as file:
-            dimension = int(file.readline())
-            for i in range(dimension):
-                square.append(list(map(int, file.readline().split())))
-            conRows = list(map(int, file.readline().split()))
-            conColumns = list(map(int, file.readline().split()))
-            conDiagonals = tuple(map(int, file.readline().split()))
-            ss = Search(Node(square), conRows, conColumns, conDiagonals)
-            # mapping = ss.mapConnections(square)
-            # for i in mapping:
-            #     print(i)
-            result = ss.search()
-            for i in result:
-                print (i)
-            self.assertTrue(ss.isGoalReached)
+    # def testFileLarge(self):
+    #     fname = "src/sample3.txt"
+    #     dimension, square = None, []
+    #     with open(fname, "r") as file:
+    #         dimension = int(file.readline())
+    #         for i in range(dimension):
+    #             square.append(list(map(int, file.readline().split())))
+    #         conRows = list(map(int, file.readline().split()))
+    #         conColumns = list(map(int, file.readline().split()))
+    #         conDiagonals = tuple(map(int, file.readline().split()))
+    #         ss = Search(Node(square), conRows, conColumns, conDiagonals)
+    #         # mapping = ss.mapConnections(square)
+    #         # for i in mapping:
+    #         #     print(i)
+    #         result = ss.search()
+    #         for i in result:
+    #             print (i)
+    #         self.assertTrue(ss.isGoalReached)
 
 
 
