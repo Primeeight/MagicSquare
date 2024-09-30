@@ -122,35 +122,40 @@ class MyTestCase(unittest.TestCase):
     #         print("testing sample n = 4")
     #         print(result.value)
     #     self.assertTrue(ss.isGoalReached)
-    def testSearchBackjump5(self):
-        node = Node([[4, -1, -1, 4, 4],
-                     [8, -1, -1, -1, 8],
-                     [4, 4, -1, -1, 4],
-                     [1, -1, -1, 1, 1],
-                     [2, 2, 2, -1, 2]])
-        ss = Search(node, [18, 25, 18, 9, 11], [19, 15, 14, 14, 19], [13, 15])
-        result = ss.search()
-        self.assertTrue(ss.isGoalReached)
-
-    # def testSearchSampleBackjumpVar(self):
-    #     n = 5
-    #     conRow, conCol, conDiag = [], [], []
-    #     lst = [-1] * n
-    #     for i in range(len(lst)):
-    #         lst[i] = random.choices([random.randint(0, 9), -1], [.667, .333], k=n)
-    #     node = Node(copy.deepcopy(lst))
-    #     for i in range(len(lst)):
-    #         conRow.append(node.sumRow(i, True))
-    #         conCol.append(node.sumColumn(i, True))
-    #     conDiag = [node.sumMin(True), node.sumMax(True)]
-    #     ss = Search(node, conRow, conCol, conDiag)
+    # def testSearchBackjump5(self):
+    #     node = Node([[4, -1, -1, 4, 4],
+    #                  [8, -1, -1, -1, 8],
+    #                  [4, 4, -1, -1, 4],
+    #                  [1, -1, -1, 1, 1],
+    #                  [2, 2, 2, -1, 2]])
+    #     ss = Search(node, [18, 25, 18, 9, 11], [19, 15, 14, 14, 19], [13, 15])
     #     result = ss.search()
-    #     if result:
-    #         print ("original")
-    #         print(lst)
-    #         print("testing sample with back jumping")
-    #         print(result.value)
     #     self.assertTrue(ss.isGoalReached)
+
+    def testSearchSampleBackjumpVar(self):
+        n = 8
+        conRow, conCol, conDiag = [], [], []
+        lst = [-1] * n
+        for i in range(len(lst)):
+            lst[i] = random.choices(list(range(0,9)), k=n)
+        node = Node(copy.deepcopy(lst))
+        for i in range(len(lst)):
+            conRow.append(node.sumRow(i, True))
+            conCol.append(node.sumColumn(i, True))
+        conDiag = [node.sumMin(True), node.sumMax(True)]
+
+        for i in range(len(node.value)):
+            for j in range(len(node.value)):
+                value = node.value[i][j]
+                node.value[i][j] = random.choice([value, value, -1])
+        ss = Search(node, conRow, conCol, conDiag)
+        result = ss.search()
+        if result:
+            print ("original")
+            print(lst)
+            print("testing sample with back jumping")
+            print(result.value)
+        self.assertTrue(ss.isGoalReached)
 
     # def testSearchSampleBackTraceVar(self):
     #     n = 3
