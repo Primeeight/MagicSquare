@@ -114,6 +114,7 @@ class SearchSolution:
             current = self.confSets.get((i, j))
             current = [i for i in self.assigned if i in current]
             #Get the most recent variable
+            #fails at 2,0
             parentvar = current.pop()
             parent = self.confSets[tuple(parentvar)]
             #join operation
