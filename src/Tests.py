@@ -1,7 +1,6 @@
 import copy
 import unittest
 import random
-import timeit
 from Node import Node
 from SearchSolution import SearchSolution as Search
 
@@ -68,7 +67,7 @@ class MyTestCase(unittest.TestCase):
     #Tests getting the conflict list of an assigned variable.
     def testGetConflicts(self):
         node = Node([[5, 5, 0], [5, 1, 2], [-1, 5, 2]])
-        ss = Search(node, [10, 8, 9], [12, 10, 5], [9, 3])
+        Search(node, [10, 8, 9], [12, 10, 5], [9, 3])
         result = node.getConflicts([2,1], [(0,0), (0,1), (1,1), (2,1), (2,2)])
         self.assertEqual(result, [(0,1), (1,1), (2,2)])
 
@@ -107,7 +106,7 @@ class MyTestCase(unittest.TestCase):
     def testSampleSize4(self):
         node = Node([[8,7,3,1], [2, 4, -1, 8], [-1, -1, 9, 0], [0, 2, -1, -1]])
         ss = Search(node, [19, 20, 12, 12], [11, 15, 22, 15], [27, 9])
-        result = ss.search()
+        ss.search()
         self.assertTrue(ss.isGoalReached)
 
     # Tests CDBJ search with a larger problem size of 5
@@ -118,7 +117,7 @@ class MyTestCase(unittest.TestCase):
                      [1, -1, -1, 1, 1],
                      [2, 2, 2, -1, 2]])
         ss = Search(node, [18, 25, 18, 9, 11], [19, 15, 14, 14, 19], [13, 15])
-        result = ss.search()
+        ss.search()
         self.assertTrue(ss.isGoalReached)
     # Tests CDBJ search with a larger problem size of 8, half of the problem size of the final sample file.
     def testSampleSize8(self):
@@ -133,7 +132,7 @@ class MyTestCase(unittest.TestCase):
         ss = Search(node, [41, 35, 28, 25, 31, 16, 36, 31, 43],
                     [24, 28, 33, 30, 39, 23, 37, 29],
                     [43, 31])
-        result = ss.search()
+        ss.search()
         self.assertTrue(ss.isGoalReached)
 
     #Tests CDBJ with a randomly created magic-square and its constraints.
