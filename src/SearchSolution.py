@@ -24,6 +24,8 @@ class SearchSolution:
         self.confSets = {}
         # self.confSets = self.initDict(self.varlist)
         self.visited = []
+        self.completed = []
+        self.domains = self.initDomains({})
 
 
     #Determines if there is a valid solution.
@@ -32,21 +34,38 @@ class SearchSolution:
         if node.sumMin() > self.conDiagonal[0] or node.sumMax() > self.conDiagonal[1]:
             return False
         # Evaluate if variables with max values are able to reach constraints.
-        if node.sumMin(True) < self.conDiagonal[0] or node.sumMax(True) < self.conDiagonal[1]:
+        newnode = copy.deepcopy(node)
+        for i in range(len(newnode.value)):
+            for j in range(len(newnode.value)):
+                if newnode.value[i][j] == -1:
+                    newnode.value[i][j] = max(self.domains[(i,j)])
+        i, j = 0,0
+        if newnode.sumMin(True) < self.conDiagonal[0] or newnode.sumMax(True) < self.conDiagonal[1]:
             return False
-        for i in range(len(node.value)):
+        for i in range(len(newnode.value)):
             if node.sumRow(i) > self.conRow[i] or node.sumColumn(i) > self.conColumn[i]:
                 return False
-            if node.sumRow(i, True) < self.conRow[i] or node.sumColumn(i, True)< self.conColumn[i]:
+            if newnode.sumRow(i, True) < self.conRow[i] or newnode.sumColumn(i, True)< self.conColumn[i]:
                 return False
         return True
 
-    #Create an empty dictionary with an entry for all variables.
-    # def initDict(self, varlist):
-    #     dict = {}
-    #     for var in varlist:
-    #         dict[tuple(var)] = []
-    #     return dict
+    #called after getvarlist but before is valid.
+    def initDomains(self, dictionary):
+        if len(dictionary.keys()) == len(self.varlist):
+            return dictionary
+        unassigned = [x for x in self.varlist if x not in list(dictionary.keys())]
+        var = unassigned[0]
+        lst = [9]*4
+        if var[1] == var[0]:
+            lst[0] = self.conDiagonal[0] - self.start.sumMin()
+        if var[1] == len(self.start.value) -var[0] -1:
+            lst[1] = self.conDiagonal[1] - self.start.sumMax()
+        lst[2] = self.conRow[var[0]] - self.start.sumRow(var[0])
+        lst[3] = self.conColumn[var[1]] - self.start.sumColumn(var[1])
+        lst.append(9)
+        dictionary[var] = list(range(min(lst)+1))
+        return self.initDomains(dictionary)
+
     #Unassigned Variables function
     #Treat individual elements as variables, return a tuple as the index of the element.
     def getUnassignedVar(self, node):
@@ -72,10 +91,12 @@ class SearchSolution:
 
     #Main search function
     def search(self):
-        print("checking variables:")
         if self.isValid(self.start):
+            print("Back jumping to variables:")
+            self.domains = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
             solution = self.cdBackjump(self.start)
             return solution
+        return False
 
     #Conflict Directed Back jumping
     def cdBackjump(self, node):
@@ -98,7 +119,6 @@ class SearchSolution:
             for value in self.domains:
                 newnode.value[i][j] = value
                 if self.checkConsistency(newnode):
-                    # print(tuple(ijvar))
                     self.assigned[tuple(ijvar)] = value
                     self.curr.value[i][j] = value
                     result = self.cdBackjump(copy.deepcopy(self.curr))
@@ -109,9 +129,14 @@ class SearchSolution:
                             self.assigned.pop(ijvar)
                             self.curr.value[i][j] = -1
                             return result
+                if self.checkCompleteness(ijvar):
+                    self.completed.append(ijvar)
 
                 # conflict set generation
-            current = self.confSets.get((i, j))
+            notcompleted = [i for i in self.assigned if i not in self.completed]
+            if ijvar in notcompleted:
+                notcompleted.remove(ijvar)
+            current = self.confSets.get((i, j)) + notcompleted
             current = [i for i in self.assigned if i in current]
             #Get the most recent variable
             #fails at 2,0
@@ -122,6 +147,7 @@ class SearchSolution:
             newcurrent = list(set.union(set(parent), set(current)))
             self.confSets[tuple(parentvar)] = newcurrent
             self.confSets.pop(tuple(ijvar))
+            self.completed.clear()
             if ijvar in self.assigned:
                 self.assigned.pop(tuple(ijvar))
                 self.curr.value[ijvar[0]][ijvar[1]] = -1
@@ -156,6 +182,18 @@ class SearchSolution:
             return False
         for j in range(len(newnode.value)):
             if newnode.sumRow(j) > self.conRow[j] or newnode.sumColumn(j) > self.conColumn[j]:
+                return False
+        return True
+    #Checks if a node is in a complete assignment, the node is in a complete row, column, or diagonal if applicable.
+    def checkCompleteness(self, var):
+        i, j = var[0], var[1]
+        if self.curr.sumRow(i) != self.conRow[i] or self.curr.sumColumn(j) != self.conColumn[j]:
+            return False
+        if j == i:
+            if self.curr.sumMin() != self.conDiagonal[0]:
+                return False
+        if j == len(self.curr.value) - i -1:
+            if self.curr.sumMax() != self.conDiagonal[1]:
                 return False
         return True
 

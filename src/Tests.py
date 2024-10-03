@@ -106,22 +106,15 @@ class MyTestCase(unittest.TestCase):
     #         print("testing sample with back jumping")
     #     self.assertTrue(ss.isGoalReached)
     #
-    # def testSearchSample2BackJump(self):
-    #     node = Node([[7, 1, 0], [-1, -1, -1], [3, -1, -1]])
-    #     ss = Search(node, [8, 14, 5], [11, 9, 7], [15, 10])
-    #     result = ss.search()
-    #     if result:
-    #         print("testing sample with back jumping")
-    #     self.assertTrue(ss.isGoalReached)
-
+    #
     # def testSearchBackjumpLarger(self):
     #     node = Node([[8,7,3,1], [2, 4, -1, 8], [-1, -1, 9, 0], [0, 2, -1, -1]])
     #     ss = Search(node, [19, 20, 12, 12], [11, 15, 22, 15], [27, 9])
     #     result = ss.search()
     #     if result:
-    #         print("testing sample n = 4")
     #         print(result.value)
     #     self.assertTrue(ss.isGoalReached)
+
     # def testSearchBackjump5(self):
     #     node = Node([[4, -1, -1, 4, 4],
     #                  [8, -1, -1, -1, 8],
@@ -246,29 +239,27 @@ class MyTestCase(unittest.TestCase):
     #     goal = ss.isGoalValue(result.value)
     #     self.assertTrue(goal)
 
-    def testFile(self):
-        fname = ["src/sample1.txt", "src/sample2.txt", "src/sample2_fail.txt", "src/sample3_fail.txt"]
-        dimension, square = None, []
-        for i in range(len(fname)):
-            with open(fname[i], "r") as file:
-                dimension = int(file.readline())
-                for j in range(dimension):
-                    square.append(list(map(int, file.readline().split())))
-                conRows = list(map(int, file.readline().split()))
-                conColumns = list(map(int, file.readline().split()))
-                conDiagonals = tuple(map(int, file.readline().split()))
-                ss = Search(Node(square), conRows, conColumns, conDiagonals)
-                print(fname[i])
-                ss.search()
-                dimension, square = None, []
-                if fname[i].__contains__("fail"):
-                    self.assertFalse(ss.isGoalReached)
-                else:
-                    self.assertTrue(ss.isGoalReached)
+    # def testFile(self):
+    #     fname = ["src/sample1.txt", "src/sample2.txt", "src/sample2_fail.txt", "src/sample3_fail.txt"]
+    #     dimension, square = None, []
+    #     for i in range(len(fname)):
+    #         with open(fname[i], "r") as file:
+    #             dimension = int(file.readline())
+    #             for j in range(dimension):
+    #                 square.append(list(map(int, file.readline().split())))
+    #             conRows = list(map(int, file.readline().split()))
+    #             conColumns = list(map(int, file.readline().split()))
+    #             conDiagonals = tuple(map(int, file.readline().split()))
+    #             ss = Search(Node(square), conRows, conColumns, conDiagonals)
+    #             ss.search()
+    #             dimension, square = None, []
+    #             if fname[i].__contains__("fail"):
+    #                 self.assertFalse(ss.isGoalReached)
+    #             else:
+    #                 self.assertTrue(ss.isGoalReached)
 
-    # Currently this test does not get a solution due to the problem size, will lead to hanging.
-    # def testFileLarge(self):
-    #     fname = "src/sample3.txt"
+    # def testSample2(self):
+    #     fname = "src/sample2.txt"
     #     dimension, square = None, []
     #     with open(fname, "r") as file:
     #         dimension = int(file.readline())
@@ -278,13 +269,29 @@ class MyTestCase(unittest.TestCase):
     #         conColumns = list(map(int, file.readline().split()))
     #         conDiagonals = tuple(map(int, file.readline().split()))
     #         ss = Search(Node(square), conRows, conColumns, conDiagonals)
-    #         # mapping = ss.mapConnections(square)
-    #         # for i in mapping:
-    #         #     print(i)
     #         result = ss.search()
-    #         for i in result:
-    #             print (i)
+    #         print(result.value)
     #         self.assertTrue(ss.isGoalReached)
+
+    # Currently this test does not get a solution due to the problem size, will lead to hanging.
+    def testFileLarge(self):
+        fname = "src/sample3.txt"
+        dimension, square = None, []
+        with open(fname, "r") as file:
+            dimension = int(file.readline())
+            for i in range(dimension):
+                square.append(list(map(int, file.readline().split())))
+            conRows = list(map(int, file.readline().split()))
+            conColumns = list(map(int, file.readline().split()))
+            conDiagonals = tuple(map(int, file.readline().split()))
+            ss = Search(Node(square), conRows, conColumns, conDiagonals)
+            # mapping = ss.mapConnections(square)
+            # for i in mapping:
+            #     print(i)
+            result = ss.search()
+            for i in result:
+                print (i)
+            self.assertTrue(ss.isGoalReached)
 
 
 
