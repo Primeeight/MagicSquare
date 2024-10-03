@@ -31,7 +31,7 @@ class MyTestCase(unittest.TestCase):
     def testGetUnassignedVariable(self):
         node = Node([[1, -1, -1], [-1, -1, 6], [7, -1, 9]])
         ss = Search(node, [13,15, 24],[12,22, 18], [15, 15])
-        self.assertEqual(ss.getUnassignedVar(node), (0, 2))
+        self.assertEqual(ss.getUnassignedVar(), (0, 2))
 
     # Tests the Min Remaining heuristic by calling get unassigned var.
     def testHeuristic(self):
@@ -51,16 +51,16 @@ class MyTestCase(unittest.TestCase):
     def testGetUnassignedVarHeuristic(self):
         node = Node([[-1, -1, 0], [5, -1, 2], [-1, -1, -1]])
         ss = Search(node, [10,8, 9],[12,10, 5], [9, 3])
-        self.assertEqual(ss.getUnassignedVar(node), (1, 1))
+        self.assertEqual(ss.getUnassignedVar(), (1, 1))
         node = Node([[-1, -1, 0], [5, 1, 2], [-1, -1, -1]])
         ss = Search(node, [10, 8, 9], [12, 10, 5], [9, 3])
-        self.assertEqual(ss.getUnassignedVar(node), (2, 0))
+        self.assertEqual(ss.getUnassignedVar(), (2, 0))
         node = Node([[-1, -1, 0], [5, 1, 2], [2, -1, -1]])
         ss = Search(node, [10, 8, 9], [12, 10, 5], [9, 3])
-        self.assertEqual(ss.getUnassignedVar(node), (2, 2))
+        self.assertEqual(ss.getUnassignedVar(), (2, 2))
         node = Node([[-1, -1, 0], [5, 1, 2], [2, -1, 3]])
         ss = Search(node, [10, 8, 9], [12, 10, 5], [9, 3])
-        self.assertEqual(ss.getUnassignedVar(node), (2, 1))
+        self.assertEqual(ss.getUnassignedVar(), (2, 1))
         result = ss.search()
         self.assertTrue(ss.isGoalValue(result.value))
 
