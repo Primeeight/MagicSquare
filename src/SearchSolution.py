@@ -49,7 +49,7 @@ class SearchSolution:
                 return False
         return True
 
-    #called after getvarlist but before is valid.
+    #Initialize the set of domains for each variable, used to determine if there's a valid solution only.
     def initDomains(self, dictionary):
         if len(dictionary.keys()) == len(self.varlist):
             return dictionary
@@ -68,15 +68,19 @@ class SearchSolution:
 
     #Unassigned Variables function
     #Treat individual elements as variables, return a tuple as the index of the element.
-    def getUnassignedVar(self, node):
+    #The order of variables are static, defined by the heuristic at initialization.
+    def getUnassignedVar(self):
         #Order is assigned using heuristics at the beginning of program.
         unassigned = [x for x in self.varlist if x not in list(self.assigned.keys())]
         return unassigned[0]
-    #Heuristic function, returns a pair of min value, negative degree value
+
+
+    #Heuristic function, returns a pair of min value heuristic, negative degree value heuristic
     def heuristic(self, index, node):
         result =(node.minRemaining(index[0], index[1],self.conDiagonal,self.conRow,self.conColumn),
                   -node.totalVar(index[0], index[1]))
         return result
+
     def getVarList(self, node):
         varlist = [(i, j)
                     for i in (range(len(node.value)))
@@ -84,9 +88,7 @@ class SearchSolution:
                     if node.value[i][j] == -1]
         #Sort the list of variables by the heuristic.
         varlist.sort(key = lambda index: self.heuristic(index, node))
-        print("Var list is:")
-        for i in varlist:
-            print(i)
+
         return varlist
 
     #Main search function
@@ -106,7 +108,7 @@ class SearchSolution:
             return self.curr
             # Recursive case
         if len(self.assigned) != len(self.varlist):
-            ijvar = self.getUnassignedVar(node)
+            ijvar = self.getUnassignedVar()
             i, j = ijvar[0], ijvar[1]
             newnode = copy.deepcopy(self.curr)
             if (i,j) in self.confSets:
@@ -133,17 +135,16 @@ class SearchSolution:
                     self.completed.append(ijvar)
 
                 # conflict set generation
+            #If a variable does not have a complete assignment, it is in conflict.
             notcompleted = [i for i in self.assigned if i not in self.completed]
             if ijvar in notcompleted:
                 notcompleted.remove(ijvar)
             current = self.confSets.get((i, j)) + notcompleted
             current = [i for i in self.assigned if i in current]
             #Get the most recent variable
-            #fails at 2,0
             parentvar = current.pop()
             parent = self.confSets[tuple(parentvar)]
             #join operation
-            # self.confSets[tuple(parentvar)] =  [value for value in current if value not in parent] + parent
             newcurrent = list(set.union(set(parent), set(current)))
             self.confSets[tuple(parentvar)] = newcurrent
             self.confSets.pop(tuple(ijvar))
@@ -154,27 +155,6 @@ class SearchSolution:
             print (parentvar) if parentvar not in self.visited else ""
             self.visited.append(parentvar) if parentvar not in self.visited else ""
             return parentvar
-
-    # Native backtrace method.
-    def backtrace(self, node):
-        # Base case
-        if len(self.assigned) == len(self.varlist) and self.isGoalValue(node.value):
-            return self.curr
-        # Recursive case
-        if len(self.assigned) != len(self.varlist):
-            ijvar = self.getUnassignedVar(node)
-            i, j = ijvar[0], ijvar[1]
-            newnode = copy.deepcopy(self.curr)
-            for value in self.domains:
-                newnode.value[i][j] = value
-                if self.checkConsistency(newnode):
-                    self.assigned.append(ijvar)
-                    self.curr.value[i][j] = value
-                    result = self.backtrace(copy.deepcopy(self.curr))
-                    if result is not None:
-                        return result
-                    self.assigned.pop()
-                    self.curr.value[i][j] = -1
 
     #Checks if a node is consistent.
     def checkConsistency(self, newnode):
@@ -187,15 +167,15 @@ class SearchSolution:
     #Checks if a node is in a complete assignment, the node is in a complete row, column, or diagonal if applicable.
     def checkCompleteness(self, var):
         i, j = var[0], var[1]
-        if self.curr.sumRow(i) != self.conRow[i] or self.curr.sumColumn(j) != self.conColumn[j]:
-            return False
+        if self.curr.sumRow(i) == self.conRow[i] or self.curr.sumColumn(j) == self.conColumn[j]:
+            return True
         if j == i:
-            if self.curr.sumMin() != self.conDiagonal[0]:
-                return False
+            if self.curr.sumMin() == self.conDiagonal[0]:
+                return True
         if j == len(self.curr.value) - i -1:
-            if self.curr.sumMax() != self.conDiagonal[1]:
-                return False
-        return True
+            if self.curr.sumMax() == self.conDiagonal[1]:
+                return True
+        return False
 
     #Checks if value is the goal value.
     def isGoalValue(self, value):
@@ -206,9 +186,3 @@ class SearchSolution:
             if node.sumRow(i) != self.conRow[i] or node.sumColumn(i) != self.conColumn[i]:
                 return False
         return True
-
-    def mapConnections(self, table):
-        for i in range(len(table)):
-            newlst = list(map(lambda x: 0 if x!= -1 else x ,table[i]))
-            table[i] = newlst
-        return table
