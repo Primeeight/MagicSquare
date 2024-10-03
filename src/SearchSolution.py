@@ -167,15 +167,15 @@ class SearchSolution:
     #Checks if a node is in a complete assignment, the node is in a complete row, column, or diagonal if applicable.
     def checkCompleteness(self, var):
         i, j = var[0], var[1]
-        if self.curr.sumRow(i) == self.conRow[i] or self.curr.sumColumn(j) == self.conColumn[j]:
-            return True
-        if j == i:
-            if self.curr.sumMin() == self.conDiagonal[0]:
-                return True
+        if self.curr.sumRow(i) != self.conRow[i] or self.curr.sumColumn(j) != self.conColumn[j]:
+            return False
+        if j != i:
+            if self.curr.sumMin() != self.conDiagonal[0]:
+                return False
         if j == len(self.curr.value) - i -1:
-            if self.curr.sumMax() == self.conDiagonal[1]:
-                return True
-        return False
+            if self.curr.sumMax() != self.conDiagonal[1]:
+                return False
+        return True
 
     #Checks if value is the goal value.
     def isGoalValue(self, value):
