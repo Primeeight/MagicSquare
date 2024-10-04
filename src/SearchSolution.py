@@ -94,6 +94,8 @@ class SearchSolution:
     #Main search function
     def search(self):
         if self.isValid(self.start):
+            for i in self.varlist:
+                print(i)
             print("Back jumping to variables:")
             self.domains = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
             solution = self.cdBackjump(self.start)
